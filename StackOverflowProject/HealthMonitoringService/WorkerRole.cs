@@ -1,11 +1,18 @@
+using Contracts;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
+using Microsoft.WindowsAzure.Storage.Queue;
+using StackOverflow.Data;
+using StackOverflow.Data.Entities;
+using StackOverflow.Data.Helpers;
+using StackOverflow.Data.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,23 +22,27 @@ namespace HealthMonitoringService
     {
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
+        private bool isStopped = false;
+        private HealthMonitoringRepository repo = new HealthMonitoringRepository();
+        private QueueHelper queueHelper = new QueueHelper();
 
         public override void Run()
         {
             Trace.TraceInformation("HealthMonitoringService is running");
-
             try
             {
                 this.RunAsync(this.cancellationTokenSource.Token).Wait();
             }
             finally
             {
-                this.runCompleteEvent.Set();
+                this.isStopped = true;
             }
         }
 
         public override bool OnStart()
         {
+            Trace.Listeners.Add(new ConsoleTraceListener());
+
             // Use TLS 1.2 for Service Bus connections
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
@@ -62,12 +73,73 @@ namespace HealthMonitoringService
 
         private async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace the following with your own logic.
             while (!cancellationToken.IsCancellationRequested)
             {
-                Trace.TraceInformation("Working");
-                await Task.Delay(1000);
+                try
+                {
+                    var webRoleName = "StackOverflowService";
+                    var workerRoleName = "NotificationService";
+
+                    var webRoleInstances = RoleEnvironment.Roles[webRoleName].Instances;
+                    var workerRoleInstances = RoleEnvironment.Roles[workerRoleName].Instances;
+
+                    var tasks = new List<Task>();
+
+                    foreach (var instance in webRoleInstances)
+                    {
+                        tasks.Add(CheckServiceHealth(instance, webRoleName));
+                    }
+
+                    foreach (var instance in workerRoleInstances)
+                    {
+                        tasks.Add(CheckServiceHealth(instance, workerRoleName));
+                    }
+
+                    await Task.WhenAll(tasks);
+
+                    Trace.TraceInformation("[HealthCheck] Ciklus provere zavrsen.");
+                }
+                catch (Exception ex)
+                {
+                    Trace.TraceError("[HealthCheck] Greska u glavnoj petlji: " + ex.Message);
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(4), cancellationToken);
             }
+        }
+
+        private Task CheckServiceHealth(RoleInstance instance, string roleName)
+        {
+            return Task.Run(() =>
+            {
+                string status = "OK";
+                try
+                {
+                    var endpoint = instance.InstanceEndpoints["HealthCheckEndpoint"];
+                    var endpointAddress = $"net.tcp://{endpoint.IPEndpoint}/HealthCheckEndpoint";
+
+                    var factory = new ChannelFactory<IHealthMonitoring>(new NetTcpBinding(), new EndpointAddress(endpointAddress));
+                    var proxy = factory.CreateChannel();
+
+                    proxy.IAmAlive();
+
+                    ((IClientChannel)proxy).Close();
+                }
+                catch (Exception ex)
+                {
+                    status = "NOT_OK";
+                    Trace.TraceError($"[HealthCheck] Greska pri proveri instance {instance.Id}: {ex.Message}");
+                    var queue = queueHelper.GetQueueReference("alerts"); // Naziv reda kao u projektnom zadatku
+                    string message = $"Service '{roleName}' instance '{instance.Id}' is down.";
+                    queue.AddMessage(new CloudQueueMessage(message));
+                    Trace.TraceInformation($"[HealthCheck] Poslata poruka u 'alerts' red.");
+
+                }
+
+                Trace.TraceInformation($"[HealthCheck] Provera statusa: Rola={roleName}, Instanca={instance.Id}, Status={status}");
+                var logEntry = new HealthCheckLogEntity(roleName, status);
+                repo.LogHealthStatus(logEntry);
+            });
         }
     }
 }

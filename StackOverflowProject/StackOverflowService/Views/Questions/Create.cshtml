@@ -1,0 +1,40 @@
+﻿@model StackOverflow.Data.Entities.QuestionEntity
+
+@{
+    ViewBag.Title = "Postavi novo pitanje";
+}
+
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>QuestionEntity</h4>
+        <hr />
+        <div class="form-group">
+            <label class="control-label col-md-2">Naslov</label>
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Naslov, new { htmlAttributes = new { @class = "form-control" } })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-md-2">Detaljan opis problema</label>
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.OpisProblema, 10, 30, new { @class = "form-control" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Postavi pitanje" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Nazad na listu pitanja", "Index")
+</div>

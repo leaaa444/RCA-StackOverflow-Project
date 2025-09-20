@@ -8,15 +8,25 @@
         </Bindings>
       </Site>
     </Sites>
-    <ConfigurationSettings />
+    <ConfigurationSettings>
+      <Setting name="DataConnectionString" />
+    </ConfigurationSettings>
     <Endpoints>
       <InputEndpoint name="Endpoint1" protocol="http" port="80" />
+      <InternalEndpoint name="HealthCheckEndpoint" protocol="tcp" />
     </Endpoints>
   </WebRole>
   <WorkerRole name="NotificationService" vmsize="Standard_D1_v2">
-    <ConfigurationSettings />
+    <ConfigurationSettings>
+      <Setting name="DataConnectionString" />
+    </ConfigurationSettings>
+    <Endpoints>
+      <InternalEndpoint name="HealthCheckEndpoint" protocol="tcp" />
+    </Endpoints>
   </WorkerRole>
   <WorkerRole name="HealthMonitoringService" vmsize="Standard_D1_v2">
-    <ConfigurationSettings />
+    <ConfigurationSettings>
+      <Setting name="DataConnectionString" />
+    </ConfigurationSettings>
   </WorkerRole>
 </ServiceDefinition>

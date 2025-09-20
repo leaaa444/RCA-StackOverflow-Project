@@ -16,10 +16,17 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
-                    <li>@Html.ActionLink("Home", "Index", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("About", "About", "Home", new { area = "" }, new { @class = "nav-link" })</li>
-                    <li>@Html.ActionLink("Contact", "Contact", "Home", new { area = "" }, new { @class = "nav-link" })</li>
+                <ul class="nav navbar-nav navbar-right">
+                    @if (Session["user_email"] != null)
+                    {
+                        <li><a href="#">Dobrodošli, @Session["user_email"]</a></li>
+                        <li>@Html.ActionLink("Odjavi se", "Logout", "Account")</li>
+                    }
+                    else
+                    {
+                        <li>@Html.ActionLink("Registracija", "Register", "Account")</li>
+                        <li>@Html.ActionLink("Prijava", "Login", "Account")</li>
+                    }
                 </ul>
             </div>
         </div>

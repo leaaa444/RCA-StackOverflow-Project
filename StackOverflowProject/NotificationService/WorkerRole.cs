@@ -1,3 +1,4 @@
+using Contracts;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
@@ -6,15 +7,30 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.ServiceModel;
 using System.Threading;
 using System.Threading.Tasks;
+using StackOverflow.Data;
+using Microsoft.WindowsAzure.Storage.Queue;
+using StackOverflow.Data.Helpers;
+using StackOverflow.Data.Repositories;
 
 namespace NotificationService
 {
+    public class HealthMonitoringProvider : IHealthMonitoring
+    {
+        public void IAmAlive()
+        {
+            // Prazna metoda, njen uspesan poziv je dovoljan dokaz da je servis ziv.
+        }
+    }
     public class WorkerRole : RoleEntryPoint
     {
+        private ServiceHost serviceHost;
         private readonly CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
         private readonly ManualResetEvent runCompleteEvent = new ManualResetEvent(false);
+        private QueueHelper queueHelper = new QueueHelper();
+        private AdminAlertRepository adminRepo = new AdminAlertRepository();
 
         public override void Run()
         {
@@ -32,20 +48,22 @@ namespace NotificationService
 
         public override bool OnStart()
         {
-            // Use TLS 1.2 for Service Bus connections
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            Trace.Listeners.Add(new ConsoleTraceListener());
 
-            // Set the maximum number of concurrent connections
-            ServicePointManager.DefaultConnectionLimit = 12;
+            var endpoint = RoleEnvironment.CurrentRoleInstance.InstanceEndpoints["HealthCheckEndpoint"];
+            var endpointAddress = $"net.tcp://{endpoint.IPEndpoint}/HealthCheckEndpoint";
 
-            // For information on handling configuration changes
-            // see the MSDN topic at https://go.microsoft.com/fwlink/?LinkId=166357.
+            serviceHost = new ServiceHost(typeof(HealthMonitoringProvider));
+            var binding = new NetTcpBinding();
+            serviceHost.AddServiceEndpoint(typeof(IHealthMonitoring), binding, endpointAddress);
+            serviceHost.Open();
 
-            bool result = base.OnStart();
+            Trace.TraceInformation("[WCF] HealthCheckEndpoint otvoren na adresi: " + endpointAddress);
 
-            Trace.TraceInformation("NotificationService has been started");
+            adminRepo.AddTestAdminEmail("admin@test.com");
+            Trace.TraceInformation("[INFO] Test admin email dodat u bazu.");
 
-            return result;
+            return base.OnStart();
         }
 
         public override void OnStop()
@@ -62,11 +80,38 @@ namespace NotificationService
 
         private async Task RunAsync(CancellationToken cancellationToken)
         {
-            // TODO: Replace the following with your own logic.
+            var alertsQueue = queueHelper.GetQueueReference("alerts");
+            Trace.TraceInformation("[NotificationService] Osluskujem 'alerts' red...");
+
             while (!cancellationToken.IsCancellationRequested)
             {
-                Trace.TraceInformation("Working");
-                await Task.Delay(1000);
+                CloudQueueMessage message = alertsQueue.GetMessage(TimeSpan.FromMinutes(1));
+
+                if (message != null)
+                {
+                    try
+                    {
+                        string alertContent = message.AsString;
+                        Trace.TraceInformation("[ALERT] Primljena poruka o gresci: " + alertContent);
+
+                        var adminEmails = adminRepo.GetAllAdminEmails();
+                        foreach (var admin in adminEmails)
+                        {
+                            // Simulacija slanja emaila
+                            Trace.TraceInformation($"[EMAIL] Saljem alert na: {admin.Email} sa porukom: {alertContent}");
+                        }
+
+                        alertsQueue.DeleteMessage(message); // Brisanje poruke nakon obrade
+                        Trace.TraceInformation($"[NotificationService] Poruka uspesno obradjena i izbrisana.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.TraceError($"[NotificationService] Greska pri obradi poruke: {ex.Message}");
+                        // U slucaju greske, poruka NECE biti izbrisana i vratice se u red nakon 5 minuta
+                    }
+                }
+
+                await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
             }
         }
     }

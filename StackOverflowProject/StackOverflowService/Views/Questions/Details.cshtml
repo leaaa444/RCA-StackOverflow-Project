@@ -1,0 +1,107 @@
+﻿@model StackOverflow.Data.Entities.QuestionEntity
+
+@{
+    ViewBag.Title = "Detalji Pitanja";
+}
+
+<div>
+    <h2>@Html.DisplayFor(model => model.Naslov)</h2>
+    <hr />
+    <p>
+        <strong>Autor:</strong> @Html.DisplayFor(model => model.AutorEmail) |
+        <strong>Postavljeno:</strong> @Html.DisplayFor(model => model.Timestamp)
+    </p>
+
+    <div style="margin-top: 20px;">
+        @Html.Raw(Html.Encode(Model.OpisProblema).Replace("\n", "<br />"))
+    </div>
+</div>
+
+<hr />
+<h3>Odgovori (@ViewBag.Answers.Count)</h3>
+
+@if (ViewBag.Answers.Count == 0)
+{
+    <p>Još uvek nema odgovora na ovo pitanje.</p>
+}
+else
+{
+    foreach (var answer in ViewBag.Answers)
+    {
+        bool hasVoted = ViewBag.VotedAnswerIds.Contains(answer.RowKey);
+
+        <div style="border: 1px solid @(answer.JeNajboljiOdgovor ? "green" : "#ccc"); padding: 10px; margin-bottom: 10px;">
+
+            @if (answer.JeNajboljiOdgovor)
+            {
+                <strong style="color: green;">&#10004; Najbolji odgovor</strong>
+            }
+
+            <p>@answer.TekstOdgovora</p>
+            <small>Odgovorio: @answer.AutorEmail, Dana: @answer.Timestamp</small>
+
+            <div style="margin-top: 10px;">
+                <strong>Glasovi: @answer.BrojGlasova</strong>
+
+                @if (Session["user_email"] != null &&
+                 Session["user_email"].ToString() != Model.AutorEmail &&
+                 Session["user_email"].ToString() != answer.AutorEmail)
+                {
+                    using (Html.BeginForm("Upvote", "Answers", FormMethod.Post))
+                    {
+                        @Html.Hidden("idPitanja", Model.RowKey)
+                        @Html.Hidden("idOdgovora", (string)answer.RowKey)
+
+                        if (hasVoted)
+                        {
+                            <input type="submit" value="Glasali ste" class="btn btn-xs btn-success" disabled />
+                        }
+                        else
+                        {
+                            <input type="submit" value="Glasaj za" class="btn btn-xs btn-success" />
+                        }
+                    }
+                }
+
+                @if (Session["user_email"] != null && Session["user_email"].ToString() == Model.AutorEmail)
+                {
+                    using (Html.BeginForm("MarkAsBest", "Answers", FormMethod.Post))
+                    {
+                        @Html.Hidden("idPitanja", Model.RowKey)
+                        @Html.Hidden("idOdgovora", (string)answer.RowKey)
+                        <input type="submit" value="Označi kao najbolji" class="btn btn-xs btn-info" />
+                    }
+                }
+            </div>
+        </div>
+    }
+}
+
+<hr />
+<h4>Postavi svoj odgovor</h4>
+
+@if (Session["user_email"] != null)
+{
+    using (Html.BeginForm("Create", "Answers", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="idPitanja" value="@Model.RowKey" />
+
+        <div class="form-group">
+            <textarea name="tekstOdgovora" class="form-control" rows="5" required placeholder="Unesite vaš odgovor ovde..."></textarea>
+        </div>
+        <div class="form-group">
+            <input type="submit" value="Postavi odgovor" class="btn btn-primary" />
+        </div>
+    }
+}
+else
+{
+    <p>Morate biti @Html.ActionLink("prijavljeni", "Login", "Account") da biste postavili odgovor.</p>
+}
+
+
+<hr />
+<p>
+    @Html.ActionLink("Nazad na listu svih pitanja", "Index")
+</p>

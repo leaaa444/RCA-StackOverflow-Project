@@ -1,0 +1,52 @@
+﻿
+@{
+    ViewBag.Title = "Registracija";
+}
+
+
+<h2>@ViewBag.Title</h2>
+
+@using (Html.BeginForm("Register", "Account", FormMethod.Post))
+{
+    @Html.AntiForgeryToken()
+
+<div class="form-horizontal">
+    <h4>Kreirajte novi nalog.</h4>
+    <hr />
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Ime</label>
+        <div class="col-md-10">
+            <input type="text" name="ime" class="form-control" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Prezime</label>
+        <div class="col-md-10">
+            <input type="text" name="prezime" class="form-control" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Email</label>
+        <div class="col-md-10">
+            <input type="email" name="email" class="form-control" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Lozinka</label>
+        <div class="col-md-10">
+            <input type="password" name="lozinka" class="form-control" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Registruj se" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+}
+

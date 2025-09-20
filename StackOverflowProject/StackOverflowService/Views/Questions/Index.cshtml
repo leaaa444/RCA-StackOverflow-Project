@@ -1,0 +1,56 @@
+﻿@model IEnumerable<StackOverflowService.Models.QuestionWithAnswerCountViewModel>
+
+@{
+    ViewBag.Title = "Lista Pitanja";
+}
+
+<h2>Lista Svih Pitanja</h2>
+
+<div style="margin-bottom: 15px;">
+    <strong>Sortiraj po:</strong>
+    @Html.ActionLink("Datumu", "Index", new { sortBy = "datum" }) |
+    @Html.ActionLink("Broju odgovora", "Index", new { sortBy = "odgovori" })
+</div>
+
+<p>
+    @Html.ActionLink("Postavi Novo Pitanje", "Create")
+</p>
+<table class="table">
+    <tr>
+        <th>
+            Naslov
+        </th>
+        <th>
+            Autor
+        </th>
+        <th>
+            Datum
+        </th>
+        <th>
+            Odgovori
+        </th>
+        <th></th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Question.Naslov)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Question.AutorEmail)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Question.Timestamp)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AnswerCount)
+            </td>
+            <td>
+                @Html.ActionLink("Detalji", "Details", new { id = item.Question.RowKey })
+            </td>
+        </tr>
+    }
+
+</table>
