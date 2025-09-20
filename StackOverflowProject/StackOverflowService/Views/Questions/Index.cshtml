@@ -5,6 +5,14 @@
 }
 
 <h2>Lista Svih Pitanja</h2>
+@using (Html.BeginForm("Index", "Questions", FormMethod.Get))
+{
+    <div class="form-inline" style="margin-bottom: 20px;">
+        <label>Pretraga po naslovu:</label>
+        <input type="text" name="searchString" value="@ViewBag.CurrentSearch" class="form-control" />
+        <input type="submit" value="Pretraži" class="btn btn-default" />
+    </div>
+}
 
 <div style="margin-bottom: 15px;">
     <strong>Sortiraj po:</strong>

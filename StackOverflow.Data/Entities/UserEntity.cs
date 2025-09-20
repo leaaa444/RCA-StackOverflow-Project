@@ -12,8 +12,16 @@ namespace StackOverflow.Data.Entities
     {
         public string Ime { get; set; }
         public string Prezime { get; set; }
-        public string Pol { get; set; }
-        public string DrzavaGradAdresa { get; set; }
+        [IgnoreProperty]
+        public Pol Pol { get; set; }
+        public string PolAsString
+        {
+            get { return Pol.ToString(); }
+            set { Pol = (Pol)Enum.Parse(typeof(Pol), value); }
+        }
+        public string Drzava { get; set; }
+        public string Grad { get; set; }
+        public string Adresa { get; set; }
         public string Email { get; set; }
         public string Lozinka { get; set; } 
         public string SlikaUrl { get; set; }

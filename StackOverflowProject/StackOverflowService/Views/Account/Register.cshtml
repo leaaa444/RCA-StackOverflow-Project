@@ -6,7 +6,7 @@
 
 <h2>@ViewBag.Title</h2>
 
-@using (Html.BeginForm("Register", "Account", FormMethod.Post))
+@using (Html.BeginForm("Register", "Account", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
 
@@ -32,6 +32,49 @@
         <label class="control-label col-md-2">Email</label>
         <div class="col-md-10">
             <input type="email" name="email" class="form-control" required />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Pol</label>
+        <div class="col-md-10">
+            @foreach (var polValue in Enum.GetValues(typeof(StackOverflow.Data.Entities.Pol)))
+            {
+                <div class="radio">
+                    <label>
+                        @Html.RadioButton("pol", polValue, (StackOverflow.Data.Entities.Pol)polValue == StackOverflow.Data.Entities.Pol.Muski)
+                        @polValue.ToString()
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Država</label>
+        <div class="col-md-10">
+            <input type="text" name="drzava" class="form-control" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Grad</label>
+        <div class="col-md-10">
+            <input type="text" name="grad" class="form-control" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Adresa</label>
+        <div class="col-md-10">
+            <input type="text" name="adresa" class="form-control" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Slika korisničkog naloga</label>
+        <div class="col-md-10">
+            <input type="file" name="slika" />
         </div>
     </div>
 

@@ -53,6 +53,30 @@ namespace StackOverflow.Data.Repositories
             table.Execute(updateOperation);
         }
 
+        public void BatchUpdateAnswers(List<AnswerEntity> answers)
+        {
+            if (!answers.Any()) return;
+
+            TableBatchOperation batchOperation = new TableBatchOperation();
+            foreach (var answer in answers)
+            {
+                batchOperation.Replace(answer);
+            }
+            table.ExecuteBatch(batchOperation);
+        }
+
+        public void DeleteAnswersForQuestion(List<AnswerEntity> answers)
+        {
+            if (!answers.Any()) return;
+
+            TableBatchOperation batchOperation = new TableBatchOperation();
+            foreach (var answer in answers)
+            {
+                batchOperation.Delete(answer);
+            }
+            table.ExecuteBatch(batchOperation);
+        }
+
 
 
     }

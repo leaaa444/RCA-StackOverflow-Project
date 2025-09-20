@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\AnswerEntity.cs" />
+    <Compile Include="Entities\Pol.cs" />
     <Compile Include="Entities\VoteEntity.cs" />
     <Compile Include="Repositories\AdminAlertRepository.cs" />
     <Compile Include="Entities\AdminEmailEntity.cs" />

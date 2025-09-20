@@ -63,6 +63,41 @@ namespace StackOverflow.Data.Repositories
             return table.ExecuteQuery(query).ToList();
         }
 
+        public void DeleteVotesForAnswers(List<string> answerIds)
+        {
+            if (!answerIds.Any()) return;
+
+            var allVotesToDelete = new List<VoteEntity>();
+            foreach (var answerId in answerIds)
+            {
+                var query = new TableQuery<VoteEntity>().Where(
+                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, answerId)
+                );
+                allVotesToDelete.AddRange(table.ExecuteQuery(query));
+            }
+
+            if (allVotesToDelete.Any())
+            {
+                TableBatchOperation batchOperation = new TableBatchOperation();
+                foreach (var vote in allVotesToDelete)
+                {
+                    batchOperation.Delete(vote);
+                    if (batchOperation.Count == 100)
+                    {
+                        table.ExecuteBatch(batchOperation);
+                        batchOperation = new TableBatchOperation();
+                    }
+                }
+
+                if (batchOperation.Count > 0)
+                {
+                    table.ExecuteBatch(batchOperation);
+                }
+            }
+        }
+
+
+
 
 
     }

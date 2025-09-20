@@ -46,5 +46,31 @@ namespace StackOverflow.Data.Repositories
             );
             return table.ExecuteQuery(query).FirstOrDefault();
         }
+
+        public List<QuestionEntity> SearchByTitle(string searchTerm)
+        {
+            var allQuestions = GetAllQuestions();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                return allQuestions.Where(q => q.Naslov.ToLower().Contains(searchTerm.ToLower())).ToList();
+            }
+
+            return allQuestions;
+        }
+
+        public void UpdateQuestion(QuestionEntity question)
+        {
+            TableOperation updateOperation = TableOperation.Replace(question);
+            table.Execute(updateOperation);
+        }
+
+        public void DeleteQuestion(QuestionEntity question)
+        {
+            TableOperation deleteOperation = TableOperation.Delete(question);
+            table.Execute(deleteOperation);
+        }
+
+
     }
 }

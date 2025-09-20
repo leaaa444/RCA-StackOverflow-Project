@@ -1,4 +1,7 @@
-﻿using StackOverflow.Data.Entities;
+﻿using Microsoft.Azure;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Blob;
+using StackOverflow.Data.Entities;
 using StackOverflow.Data.Repositories;
 using StackOverflowService.Models;
 using System;
@@ -17,11 +20,21 @@ namespace StackOverflowService.Controllers
 
         // GET: Questions
         // Prikazuje listu svih pitanja
-        public ActionResult Index(string sortBy = "datum")
+        public ActionResult Index(string sortBy = "datum", string searchString = "")
         {
-            var questions = questionRepo.GetAllQuestions();
-            var model = new List<QuestionWithAnswerCountViewModel>();
+            ViewBag.CurrentSearch = searchString;
+            List<QuestionEntity> questions;
 
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                questions = questionRepo.SearchByTitle(searchString);
+            }
+            else
+            {
+                questions = questionRepo.GetAllQuestions();
+            }
+
+            var model = new List<QuestionWithAnswerCountViewModel>();
             foreach (var q in questions)
             {
                 model.Add(new QuestionWithAnswerCountViewModel
@@ -30,6 +43,7 @@ namespace StackOverflowService.Controllers
                     AnswerCount = answerRepo.GetAnswersForQuestion(q.RowKey).Count
                 });
             }
+
             if (sortBy == "odgovori")
             {
                 model = model.OrderByDescending(m => m.AnswerCount).ToList();
@@ -83,24 +97,116 @@ namespace StackOverflowService.Controllers
         // Ova metoda prima podatke iz forme i kreira novo pitanje
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Create(string naslov, string opisProblema)
+        public ActionResult Create(string naslov, string opisProblema, HttpPostedFileBase slikaGreske)
         {
             if (Session["user_email"] == null)
             {
                 return RedirectToAction("Login", "Account");
             }
             string autorEmail = Session["user_email"].ToString();
+            string slikaUrl = "";
+
+            if (slikaGreske != null && slikaGreske.ContentLength > 0)
+            {
+                var storageAccount = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
+                CloudBlobClient blobStorage = storageAccount.CreateCloudBlobClient();
+                CloudBlobContainer container = blobStorage.GetContainerReference("questionimages");
+
+                string jedinstvenoIme = $"{Guid.NewGuid()}-{slikaGreske.FileName}";
+                CloudBlockBlob blob = container.GetBlockBlobReference(jedinstvenoIme);
+
+                blob.UploadFromStream(slikaGreske.InputStream);
+                slikaUrl = blob.Uri.ToString();
+            }
 
             var novoPitanje = new QuestionEntity(autorEmail)
             {
                 Naslov = naslov,
                 OpisProblema = opisProblema,
-                SlikaGreskeUrl = "" 
+                SlikaGreskeUrl = slikaUrl
             };
 
             questionRepo.AddQuestion(novoPitanje);
 
             return RedirectToAction("Index");
         }
+
+        // GET: Questions/Edit/5
+        public ActionResult Edit(string id)
+        {
+            var question = questionRepo.GetQuestion(id);
+            if (question == null) return HttpNotFound();
+
+            if (Session["user_email"] == null || Session["user_email"].ToString() != question.AutorEmail)
+            {
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+            }
+
+            return View(question);
+        }
+
+        // POST: Questions/Edit/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Edit(QuestionEntity questionData)
+        {
+            var question = questionRepo.GetQuestion(questionData.RowKey);
+            if (question == null) return HttpNotFound();
+
+            if (Session["user_email"] == null || Session["user_email"].ToString() != question.AutorEmail)
+            {
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+            }
+
+            question.Naslov = questionData.Naslov;
+            question.OpisProblema = questionData.OpisProblema;
+
+            questionRepo.UpdateQuestion(question);
+            return RedirectToAction("Details", new { id = question.RowKey });
+        }
+
+        // GET: Questions/Delete/5
+        public ActionResult Delete(string id)
+        {
+            var question = questionRepo.GetQuestion(id);
+            if (question == null) return HttpNotFound();
+
+            if (Session["user_email"] == null || Session["user_email"].ToString() != question.AutorEmail)
+            {
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+            }
+
+            return View(question);
+        }
+
+        // POST: Questions/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public ActionResult DeleteConfirmed(string id)
+        {
+            var question = questionRepo.GetQuestion(id);
+            if (question == null) return HttpNotFound();
+
+            if (Session["user_email"] == null || Session["user_email"].ToString() != question.AutorEmail)
+            {
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+            }
+
+            var answersToDelete = answerRepo.GetAnswersForQuestion(id);
+
+            if (answersToDelete.Any())
+            {
+                var answerIds = answersToDelete.Select(a => a.RowKey).ToList();
+
+                voteRepo.DeleteVotesForAnswers(answerIds);
+
+                answerRepo.DeleteAnswersForQuestion(answersToDelete);
+            }
+
+            questionRepo.DeleteQuestion(question);
+            return RedirectToAction("Index");
+        }
+
+        
     }
 }

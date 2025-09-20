@@ -15,6 +15,14 @@
     <div style="margin-top: 20px;">
         @Html.Raw(Html.Encode(Model.OpisProblema).Replace("\n", "<br />"))
     </div>
+
+    @if (!string.IsNullOrEmpty(Model.SlikaGreskeUrl))
+    {
+        <div style="margin-top: 20px;">
+            <h4>Priložena slika:</h4>
+            <img src="@Model.SlikaGreskeUrl" class="img-responsive" alt="Slika greske" />
+        </div>
+    }
 </div>
 
 <hr />
@@ -65,11 +73,25 @@ else
 
                 @if (Session["user_email"] != null && Session["user_email"].ToString() == Model.AutorEmail)
                 {
-                    using (Html.BeginForm("MarkAsBest", "Answers", FormMethod.Post))
+                    if (answer.JeNajboljiOdgovor)
                     {
-                        @Html.Hidden("idPitanja", Model.RowKey)
-                        @Html.Hidden("idOdgovora", (string)answer.RowKey)
-                        <input type="submit" value="Označi kao najbolji" class="btn btn-xs btn-info" />
+                        using (Html.BeginForm("UnmarkAsBest", "Answers", FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.Hidden("idPitanja", Model.RowKey)
+                            @Html.Hidden("idOdgovora", (string)answer.RowKey)
+                            <input type="submit" value="Ukloni oznaku" class="btn btn-xs btn-warning" />
+                        }
+                    }
+                    else
+                    {
+                        using (Html.BeginForm("MarkAsBest", "Answers", FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.Hidden("idPitanja", Model.RowKey)
+                            @Html.Hidden("idOdgovora", (string)answer.RowKey)
+                            <input type="submit" value="Označi kao najbolji" class="btn btn-xs btn-info" />
+                        }
                     }
                 }
             </div>
@@ -100,6 +122,13 @@ else
     <p>Morate biti @Html.ActionLink("prijavljeni", "Login", "Account") da biste postavili odgovor.</p>
 }
 
+@if (Session["user_email"] != null && Session["user_email"].ToString() == Model.AutorEmail)
+{
+    <p>
+        @Html.ActionLink("Izmeni", "Edit", new { id = Model.RowKey }) |
+        @Html.ActionLink("Obriši", "Delete", new { id = Model.RowKey })
+    </p>
+}
 
 <hr />
 <p>

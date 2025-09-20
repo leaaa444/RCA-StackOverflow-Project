@@ -15,6 +15,7 @@ namespace StackOverflowService.Controllers
         private AnswerRepository answerRepo = new AnswerRepository();
         private VoteRepository voteRepo = new VoteRepository(); 
         private QueueHelper queueHelper = new QueueHelper();
+        private QuestionRepository questionRepo = new QuestionRepository(); 
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -66,23 +67,74 @@ namespace StackOverflowService.Controllers
 
         // POST: Answers/MarkAsBest
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public ActionResult MarkAsBest(string idPitanja, string idOdgovora)
         {
-            // TODO: Dodati proveru da li je trenutni korisnik autor pitanja
-
-            var answer = answerRepo.GetAnswer(idPitanja, idOdgovora);
-            if (answer != null)
+            if (Session["user_email"] == null)
             {
-                answer.JeNajboljiOdgovor = true;
-                answerRepo.UpdateAnswer(answer);
+                return RedirectToAction("Login", "Account");
+            }
+
+            var question = questionRepo.GetQuestion(idPitanja);
+            if (question == null)
+            {
+                return HttpNotFound();
+            }
+
+            if (Session["user_email"].ToString() != question.AutorEmail)
+            {
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden, "Samo autor pitanja može izabrati najbolji odgovor.");
+            }
+
+            var sviOdgovori = answerRepo.GetAnswersForQuestion(idPitanja);
+
+            foreach (var odg in sviOdgovori)
+            {
+                odg.JeNajboljiOdgovor = false;
+            }
+
+            var izabraniOdgovor = sviOdgovori.FirstOrDefault(o => o.RowKey == idOdgovora);
+            if (izabraniOdgovor != null)
+            {
+                izabraniOdgovor.JeNajboljiOdgovor = true;
 
                 var queue = queueHelper.GetQueueReference("acceptedanswersqueue");
                 queue.AddMessage(new CloudQueueMessage(idOdgovora));
             }
+
+            answerRepo.BatchUpdateAnswers(sviOdgovori);
+
             return RedirectToAction("Details", "Questions", new { id = idPitanja });
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken] 
+        public ActionResult UnmarkAsBest(string idPitanja, string idOdgovora)
+        {
+            if (Session["user_email"] == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
+            var question = questionRepo.GetQuestion(idPitanja);
+            if (question == null)
+            {
+                return HttpNotFound();
+            }
+
+            if (Session["user_email"].ToString() != question.AutorEmail)
+            {
+                return new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden, "Samo autor pitanja može izmeniti najbolji odgovor.");
+            }
+
+            var answer = answerRepo.GetAnswer(idPitanja, idOdgovora);
+            if (answer != null)
+            {
+                answer.JeNajboljiOdgovor = false;
+                answerRepo.UpdateAnswer(answer);
+            }
+            return RedirectToAction("Details", "Questions", new { id = idPitanja });
+        }
 
 
     }
