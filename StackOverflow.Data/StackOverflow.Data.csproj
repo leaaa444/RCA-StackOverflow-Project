@@ -54,6 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entities\AnswerEntity.cs" />
+    <Compile Include="Entities\NotificationLogEntity.cs" />
     <Compile Include="Entities\Pol.cs" />
     <Compile Include="Entities\VoteEntity.cs" />
     <Compile Include="Repositories\AdminAlertRepository.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Entities\QuestionEntity.cs" />
     <Compile Include="Helpers\QueueHelper.cs" />
     <Compile Include="Entities\UserEntity.cs" />
+    <Compile Include="Repositories\NotificationLogRepository.cs" />
     <Compile Include="Repositories\QuestionRepository.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
     <Compile Include="Repositories\VoteRepository.cs" />

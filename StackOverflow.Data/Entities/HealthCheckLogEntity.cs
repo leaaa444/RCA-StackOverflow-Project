@@ -19,7 +19,7 @@ namespace StackOverflow.Data.Entities
 
             // RowKey mora biti jedinstven za svaki PartitionKey,
             // koristimo obrnute otkucaje sata da bi najnoviji logovi bili na vrhu.
-            this.RowKey = (DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks).ToString("d19");
+            this.RowKey = string.Format("{0:D19}-{1}", DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks, Guid.NewGuid());
 
             this.ServiceName = serviceName;
             this.Status = status;

@@ -19,6 +19,8 @@
   <WorkerRole name="NotificationService" vmsize="Standard_D1_v2">
     <ConfigurationSettings>
       <Setting name="DataConnectionString" />
+      <Setting name="EmailUsername" />
+      <Setting name="EmailPassword" />
     </ConfigurationSettings>
     <Endpoints>
       <InternalEndpoint name="HealthCheckEndpoint" protocol="tcp" />

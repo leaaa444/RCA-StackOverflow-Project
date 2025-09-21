@@ -7,13 +7,15 @@
     </ConfigurationSettings>
   </Role>
   <Role name="NotificationService">
-    <Instances count="1" />
+    <Instances count="3" />
     <ConfigurationSettings>
       <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
+      <Setting name="EmailUsername" value="leasusic2002@gmail.com" />
+      <Setting name="EmailPassword" value="oifygbgunibcltyq" />
     </ConfigurationSettings>
   </Role>
   <Role name="HealthMonitoringService">
-    <Instances count="1" />
+    <Instances count="2" />
     <ConfigurationSettings>
       <Setting name="DataConnectionString" value="UseDevelopmentStorage=true" />
     </ConfigurationSettings>

@@ -100,5 +100,47 @@ namespace StackOverflowService.Controllers
             Session.Clear(); 
             return RedirectToAction("Index", "Questions");
         }
+
+        // GET: Account/EditProfile
+        public ActionResult EditProfile()
+        {
+            if (Session["user_email"] == null)
+            {
+                return RedirectToAction("Login");
+            }
+            string email = Session["user_email"].ToString();
+            var user = userRepo.GetUser(email);
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
+            return View(user);
+        }
+
+        // POST: Account/EditProfile
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult EditProfile(UserEntity formData)
+        {
+            if (Session["user_email"] == null)
+            {
+                return RedirectToAction("Login");
+            }
+            string email = Session["user_email"].ToString();
+            var user = userRepo.GetUser(email);
+
+            user.Ime = formData.Ime;
+            user.Prezime = formData.Prezime;
+            user.Pol = formData.Pol;
+            user.Drzava = formData.Drzava;
+            user.Grad = formData.Grad;
+            user.Adresa = formData.Adresa;
+            // Ne dozvoljavamo promenu emaila ili sifre na ovoj formi
+
+            userRepo.UpdateUser(user);
+
+            ViewBag.SuccessMessage = "Profil je uspešno ažuriran!";
+            return View(user);
+        }
     }
 }

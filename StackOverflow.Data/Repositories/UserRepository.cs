@@ -53,5 +53,11 @@ namespace StackOverflow.Data.Repositories
 
             return false;
         }
+
+        public void UpdateUser(UserEntity user)
+        {
+            TableOperation updateOperation = TableOperation.Replace(user);
+            table.Execute(updateOperation);
+        }
     }
 }

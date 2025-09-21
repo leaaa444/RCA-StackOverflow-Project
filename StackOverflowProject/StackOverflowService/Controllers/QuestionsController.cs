@@ -6,6 +6,7 @@ using StackOverflow.Data.Repositories;
 using StackOverflowService.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -148,7 +149,7 @@ namespace StackOverflowService.Controllers
         // POST: Questions/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(QuestionEntity questionData)
+        public ActionResult Edit(QuestionEntity questionData, HttpPostedFileBase novaSlika)
         {
             var question = questionRepo.GetQuestion(questionData.RowKey);
             if (question == null) return HttpNotFound();
@@ -156,6 +157,25 @@ namespace StackOverflowService.Controllers
             if (Session["user_email"] == null || Session["user_email"].ToString() != question.AutorEmail)
             {
                 return new HttpStatusCodeResult(System.Net.HttpStatusCode.Forbidden);
+            }
+
+            if (novaSlika != null && novaSlika.ContentLength > 0)
+            {
+                var storageAccount = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
+                CloudBlobClient blobStorage = storageAccount.CreateCloudBlobClient();
+                CloudBlobContainer container = blobStorage.GetContainerReference("questionimages");
+
+                if (!string.IsNullOrEmpty(question.SlikaGreskeUrl))
+                {
+                    string stariBlobNaziv = Path.GetFileName(new Uri(question.SlikaGreskeUrl).AbsolutePath);
+                    CloudBlockBlob stariBlob = container.GetBlockBlobReference(stariBlobNaziv);
+                    stariBlob.DeleteIfExists();
+                }
+
+                string jedinstvenoIme = $"{Guid.NewGuid()}-{novaSlika.FileName}";
+                CloudBlockBlob noviBlob = container.GetBlockBlobReference(jedinstvenoIme);
+                noviBlob.UploadFromStream(novaSlika.InputStream);
+                question.SlikaGreskeUrl = noviBlob.Uri.ToString();
             }
 
             question.Naslov = questionData.Naslov;

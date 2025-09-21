@@ -1,20 +1,245 @@
-﻿/* Set padding to keep content from hitting the edges */
+﻿/* ==========================================================================
+   Definicija palete boja
+   ========================================================================== */
+:root {
+    --foreground: #C89F9C;
+    --background: #564154;
+    --text-color: #EED7C5;
+    --button-color: #351431;
+    --button-hover: #4a1d44;
+    --border-color: #8a7188;
+}
+
+
+/* ==========================================================================
+   Osnovni stilovi
+   ========================================================================== */
+body {
+    padding-bottom: 20px;
+    background-color: var(--background);
+    color: var(--text-color);
+}
+
 .body-content {
+    padding-top: 70px;
+    padding-bottom: 20px;
+}
+
+h2, h3, h4 {
+    color: var(--foreground);
+}
+
+h2 {
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+hr {
+    border-top: 1px solid var(--border-color);
+}
+
+/* ==========================================================================
+   Stilovi za linkove
+   ========================================================================== */
+a {
+    color: var(--foreground);
+}
+
+    a:hover,
+    a:focus {
+        color: var(--text-color);
+        text-decoration: none;
+    }
+
+
+/* ==========================================================================
+   Gornji meni (Navbar)
+   ========================================================================== */
+.navbar-custom {
+    background-color: var(--button-color) !important;
+    border-bottom: 1px solid var(--border-color); /* Dodajemo donju ivicu */
+}
+
+    .navbar-custom .navbar-brand,
+    .navbar-custom .nav-link { /* Nova klasa za linkove je .nav-link */
+        color: var(--text-color);
+    }
+
+        .navbar-custom .nav-link:hover {
+            color: var(--foreground);
+        }
+
+    .navbar-custom .navbar-toggler-icon { /* Boja ikonice za mobilni meni */
+        background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(238, 215, 197, 0.8)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+    }
+
+
+/* ==========================================================================
+   Stilovi za dugmad (Buttons)
+   ========================================================================== */
+.btn-default, .btn-primary, .btn-success, .btn-info, .btn-warning, .btn-danger {
+    background-color: var(--button-color);
+    color: var(--text-color);
+    border-color: var(--foreground);
+}
+
+    .btn-default:hover, .btn-primary:hover, .btn-success:hover, .btn-info:hover, .btn-warning:hover, .btn-danger:hover {
+        background-color: var(--button-hover);
+        color: var(--text-color);
+        border-color: var(--text-color);
+    }
+
+
+/* ==========================================================================
+   Stilovi za tabele i forme
+   ========================================================================== */
+.table {
+    border: 1px solid var(--border-color);
+}
+
+    .table > tbody > tr {
+        background-color: var(--button-color); /* Osnovna, tamnija boja za redove */
+    }
+
+    .table > tbody > tr > th,
+    .table > tfoot > tr > th,
+    .table > thead > tr > td,
+    .table > tbody > tr > td,
+    .table > tfoot > tr > td {
+        border-top: 1px solid var(--border-color);
+        color: var(--foreground);
+    }
+
+    .table > thead > tr > th {
+        background-color: var(--foreground) !important;
+        color: var(--text-color) !important;
+        border-bottom: 2px solid var(--border-color);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .table a {
+        color: var(--text-color);
+        text-decoration: underline;
+    }
+
+.form-control {
+    background-color: var(--foreground);
+    color: var(--button-color);
+    border: 1px solid var(--border-color);
+    max-width: 500px;
+}
+
+    .form-control::placeholder { 
+        color: var(--background);
+    }
+
+.form-horizontal .form-group {
+    margin-bottom: 20px;
+}
+
+.form-horizontal .control-label {
+    text-align: left;
+}
+
+footer {
+    text-align: center;
+    padding-top: 20px;
+    margin-top: 20px;
+    border-top: 1px solid var(--border-color);
+    color: var(--border-color);
+}
+
+/* ==========================================================================
+   Stil za akcione linkove (Sortiranje, Novo Pitanje...)
+   ========================================================================== */
+
+/* Kontejner za sortiranje i 'Novo Pitanje' link */
+.action-links {
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+    .action-links a {
+        display: inline-block;
+        padding: 8px 15px;
+        background-color: var(--button-color);
+        color: var(--text-color);
+        border: 1px solid var(--foreground);
+        border-radius: 4px; 
+        text-decoration: none;
+        margin-left: 10px;
+    }
+
+
+        .action-links a:hover {
+            background-color: var(--button-hover);
+            color: var(--text-color);
+        }
+
+/* ==========================================================================
+   Stil za forme (Registracija, Login, Pitanja...)
+   ========================================================================== */
+
+/* Grupa za radio dugmad da budu u jednoj liniji */
+.radio-group {
+    display: flex;
+    align-items: center;
+    padding-top: 7px;
+}
+
+    .radio-group .radio {
+        margin-right: 20px; /* Razmak izmedju opcija */
+    }
+
+/* Stil za dugme za upload fajla */
+input[type=file] {
+    margin-top: 7px;
+}
+
+/* ==========================================================================
+   Stil za stranicu sa detaljima pitanja
+   ========================================================================== */
+
+/* Kontejner za jedno pitanje */
+.question-details {
+    background-color: var(--button-color);
+    padding: 20px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 30px;
+}
+
+/* Kontejner za jedan odgovor */
+.answer-container {
+    border-top: 1px solid var(--border-color);
+    padding-top: 15px;
     margin-top: 15px;
-    padding-left: 15px;
-    padding-right: 15px;
 }
 
-/* Override the default bootstrap behavior where horizontal description lists 
-   will truncate terms that are too long to fit in the left column 
-*/
-.dl-horizontal dt {
-    white-space: normal;
+    .answer-container.best-answer { /* Specijalna klasa za najbolji odgovor */
+        border: 1px solid var(--success-color);
+        background-color: rgba(40, 167, 69, 0.1); /* Blaga zelena pozadina */
+        padding: 15px;
+        border-radius: 5px;
+    }
+
+/* Akcije za odgovor (glasanje, itd.) */
+.answer-actions {
+    margin-top: 10px;
+    display: flex; /* Poređaj elemente horizontalno */
+    align-items: center; /* Vertikalno centriraj */
 }
 
-/* Set width on the form input elements since they're 100% wide by default */
-input,
-select,
-textarea {
-    max-width: 280px;
-}
+    .answer-actions .votes {
+        font-weight: bold;
+        margin-right: 20px;
+    }
+
+    .answer-actions form {
+        margin-right: 10px; /* Razmak između dugmadi */
+    }

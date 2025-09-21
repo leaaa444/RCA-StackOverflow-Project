@@ -6,44 +6,64 @@
 
 <h2>@ViewBag.Title</h2>
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("Edit", "Questions", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+<div class="form-horizontal">
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-        @* Skrivena polja koja cuvaju ID i ostale nepromenljive podatke *@
-        @Html.HiddenFor(model => model.PartitionKey)
-        @Html.HiddenFor(model => model.RowKey)
-        @Html.HiddenFor(model => model.Timestamp)
-        @Html.HiddenFor(model => model.ETag)
-        @Html.HiddenFor(model => model.AutorEmail)
-        @Html.HiddenFor(model => model.SlikaGreskeUrl)
+    @* Skrivena polja koja cuvaju ID i ostale nepromenljive podatke *@
+    @Html.HiddenFor(model => model.PartitionKey)
+    @Html.HiddenFor(model => model.RowKey)
+    @Html.HiddenFor(model => model.Timestamp)
+    @Html.HiddenFor(model => model.ETag)
+    @Html.HiddenFor(model => model.AutorEmail)
 
-        <div class="form-group">
-            <label class="control-label col-md-2">Naslov</label>
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Naslov, new { htmlAttributes = new { @class = "form-control" } })
-                @Html.ValidationMessageFor(model => model.Naslov, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Detaljan opis problema</label>
-            <div class="col-md-10">
-                @Html.TextAreaFor(model => model.OpisProblema, 10, 30, new { @class = "form-control" })
-                @Html.ValidationMessageFor(model => model.OpisProblema, "", new { @class = "text-danger" })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Sačuvaj izmene" class="btn btn-default" />
-            </div>
+    <div class="form-group">
+        <label class="control-label col-md-2">Naslov</label>
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Naslov, new { htmlAttributes = new { @class = "form-control" } })
+            @Html.ValidationMessageFor(model => model.Naslov, "", new { @class = "text-danger" })
         </div>
     </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Detaljan opis problema</label>
+        <div class="col-md-10">
+            @Html.TextAreaFor(model => model.OpisProblema, 10, 30, new { @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.OpisProblema, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Trenutna slika</label>
+        <div class="col-md-10">
+            @if (!string.IsNullOrEmpty(Model.SlikaGreskeUrl))
+            {
+                <img src="@Model.SlikaGreskeUrl" style="max-width: 200px; max-height: 200px;" class="thumbnail" />
+            }
+            else
+            {
+                <p>Nema priložene slike.</p>
+            }
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Promeni sliku</label>
+        <div class="col-md-10">
+            <input type="file" name="novaSlika" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Sačuvaj izmene" class="btn btn-default" />
+        </div>
+    </div>
+</div>
 }
 
 <div>

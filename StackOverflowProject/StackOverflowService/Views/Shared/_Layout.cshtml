@@ -3,29 +3,30 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - My ASP.NET Application</title>
-    @Styles.Render("~/Content/css")
+    <title>@ViewBag.Title - Stack Overflow Projekat</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
     @Scripts.Render("~/bundles/modernizr")
 </head>
 <body>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-custom">
         <div class="container">
-            @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
-            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" title="Toggle navigation" aria-controls="navbarSupportedContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
+            @Html.ActionLink("Stack Overflow Projekat", "Index", "Questions", new { area = "" }, new { @class = "navbar-brand" })
+            <button type="button" class="navbar-toggler" data-toggle="collapse" data-target=".navbar-collapse" title="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse d-sm-inline-flex justify-content-between">
-                <ul class="nav navbar-nav navbar-right">
+            <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                <ul class="navbar-nav">
                     @if (Session["user_email"] != null)
                     {
-                        <li><a href="#">Dobrodošli, @Session["user_email"]</a></li>
-                        <li>@Html.ActionLink("Odjavi se", "Logout", "Account")</li>
+                        <li class="nav-item">@Html.ActionLink("Izmeni Profil", "EditProfile", "Account", null, new { @class = "nav-link" })</li>
+                        <li class="nav-item"><a class="nav-link" href="#">Dobrodošli, @Session["user_email"]</a></li>
+                        <li class="nav-item">@Html.ActionLink("Odjavi se", "Logout", "Account", null, new { @class = "nav-link" })</li>
                     }
                     else
                     {
-                        <li>@Html.ActionLink("Registracija", "Register", "Account")</li>
-                        <li>@Html.ActionLink("Prijava", "Login", "Account")</li>
+                        <li class="nav-item">@Html.ActionLink("Registracija", "Register", "Account", null, new { @class = "nav-link" })</li>
+                        <li class="nav-item">@Html.ActionLink("Prijava", "Login", "Account", null, new { @class = "nav-link" })</li>
                     }
                 </ul>
             </div>
@@ -35,7 +36,7 @@
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+            <p>&copy; @DateTime.Now.Year - Stack Overflow Projekat</p>
         </footer>
     </div>
 

@@ -77,6 +77,14 @@ namespace StackOverflow.Data.Repositories
             table.ExecuteBatch(batchOperation);
         }
 
+        public AnswerEntity GetAnswerById(string idOdgovora)
+        {
+            var query = new TableQuery<AnswerEntity>();
+            var allAnswers = table.ExecuteQuery(query).ToList();
+            return allAnswers.FirstOrDefault(a => a.RowKey == idOdgovora);
+        }
+
+
 
 
     }
