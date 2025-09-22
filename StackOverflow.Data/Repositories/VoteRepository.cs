@@ -39,27 +39,11 @@ namespace StackOverflow.Data.Repositories
             return table.ExecuteQuery(query).FirstOrDefault() != null;
         }
 
-        public List<VoteEntity> GetVotesForQuestionByUser(List<string> answerIds, string userEmail)
+        public List<VoteEntity> GetAllVotesByUser(string userEmail)
         {
-            string finalFilter = "";
-            foreach (var answerId in answerIds)
-            {
-                string singleFilter = TableQuery.CombineFilters(
-                    TableQuery.GenerateFilterCondition("PartitionKey", QueryComparisons.Equal, answerId),
-                    TableOperators.And,
-                    TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, userEmail)
-                );
-
-                if (string.IsNullOrEmpty(finalFilter))
-                    finalFilter = singleFilter;
-                else
-                    finalFilter = TableQuery.CombineFilters(finalFilter, TableOperators.Or, singleFilter);
-            }
-
-            if (string.IsNullOrEmpty(finalFilter))
-                return new List<VoteEntity>();
-
-            var query = new TableQuery<VoteEntity>().Where(finalFilter);
+            var query = new TableQuery<VoteEntity>().Where(
+                TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, userEmail)
+            );
             return table.ExecuteQuery(query).ToList();
         }
 

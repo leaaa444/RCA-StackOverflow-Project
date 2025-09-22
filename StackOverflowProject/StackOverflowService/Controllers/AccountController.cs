@@ -6,6 +6,7 @@ using StackOverflow.Data.Entities;
 using StackOverflow.Data.Repositories;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -39,7 +40,6 @@ namespace StackOverflowService.Controllers
             string slikaUrl = "";
             if (slika != null && slika.ContentLength > 0)
             {
-                // ... (postojeci kod za upload slike)
                 var storageAccount = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
                 CloudBlobClient blobStorage = storageAccount.CreateCloudBlobClient();
                 CloudBlobContainer container = blobStorage.GetContainerReference("profileimages");
@@ -47,6 +47,10 @@ namespace StackOverflowService.Controllers
                 CloudBlockBlob blob = container.GetBlockBlobReference(jedinstvenoIme);
                 blob.UploadFromStream(slika.InputStream);
                 slikaUrl = blob.Uri.ToString();
+            }
+            else
+            {
+                slikaUrl = "/Content/Images/default-avatar.png";
             }
 
             var newUser = new UserEntity(email)
@@ -120,7 +124,7 @@ namespace StackOverflowService.Controllers
         // POST: Account/EditProfile
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult EditProfile(UserEntity formData)
+        public ActionResult EditProfile(UserEntity formData, HttpPostedFileBase novaSlika)
         {
             if (Session["user_email"] == null)
             {
@@ -129,18 +133,79 @@ namespace StackOverflowService.Controllers
             string email = Session["user_email"].ToString();
             var user = userRepo.GetUser(email);
 
+            if (novaSlika != null && novaSlika.ContentLength > 0)
+            {
+                var storageAccount = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
+                CloudBlobClient blobStorage = storageAccount.CreateCloudBlobClient();
+                CloudBlobContainer container = blobStorage.GetContainerReference("profileimages");
+
+                if (!string.IsNullOrEmpty(user.SlikaUrl))
+                {
+                    string stariBlobNaziv = Path.GetFileName(new Uri(user.SlikaUrl).AbsolutePath);
+                    CloudBlockBlob stariBlob = container.GetBlockBlobReference(stariBlobNaziv);
+                    stariBlob.DeleteIfExists();
+                }
+
+                string jedinstvenoIme = $"{Guid.NewGuid()}-{novaSlika.FileName}";
+                CloudBlockBlob noviBlob = container.GetBlockBlobReference(jedinstvenoIme);
+                noviBlob.UploadFromStream(novaSlika.InputStream);
+                user.SlikaUrl = noviBlob.Uri.ToString();
+            }
+
             user.Ime = formData.Ime;
             user.Prezime = formData.Prezime;
             user.Pol = formData.Pol;
             user.Drzava = formData.Drzava;
             user.Grad = formData.Grad;
             user.Adresa = formData.Adresa;
-            // Ne dozvoljavamo promenu emaila ili sifre na ovoj formi
 
             userRepo.UpdateUser(user);
 
             ViewBag.SuccessMessage = "Profil je uspešno ažuriran!";
             return View(user);
         }
+
+        // GET: Account/ChangePassword
+        public ActionResult ChangePassword()
+        {
+            if (Session["user_email"] == null)
+            {
+                return RedirectToAction("Login");
+            }
+            return View();
+        }
+
+        // POST: Account/ChangePassword
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ChangePassword(string oldPassword, string newPassword, string confirmPassword)
+        {
+            if (Session["user_email"] == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            if (newPassword != confirmPassword)
+            {
+                ViewBag.Error = "Nova lozinka i potvrda se ne poklapaju.";
+                return View();
+            }
+
+            string email = Session["user_email"].ToString();
+            bool success = userRepo.ChangePassword(email, oldPassword, newPassword);
+
+            if (success)
+            {
+                ViewBag.SuccessMessage = "Lozinka je uspešno promenjena!";
+            }
+            else
+            {
+                ViewBag.Error = "Stara lozinka nije ispravna.";
+            }
+
+            return View();
+        }
+
+
     }
 }

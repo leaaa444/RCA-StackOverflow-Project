@@ -129,7 +129,7 @@ namespace HealthMonitoringService
                 {
                     status = "NOT_OK";
                     Trace.TraceError($"[HealthCheck] Greska pri proveri instance {instance.Id}: {ex.Message}");
-                    var queue = queueHelper.GetQueueReference("alerts"); // Naziv reda kao u projektnom zadatku
+                    var queue = queueHelper.GetQueueReference("alerts");
                     string message = $"Service '{roleName}' instance '{instance.Id}' is down.";
                     queue.AddMessage(new CloudQueueMessage(message));
                     Trace.TraceInformation($"[HealthCheck] Poslata poruka u 'alerts' red.");

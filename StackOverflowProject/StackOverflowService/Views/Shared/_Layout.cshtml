@@ -6,6 +6,7 @@
     <title>@ViewBag.Title - Stack Overflow Projekat</title>
     <link href="~/Content/bootstrap.css" rel="stylesheet" />
     <link href="~/Content/Site.css" rel="stylesheet" />
+    <link href="~/Content/cards.css" rel="stylesheet" />
     @Scripts.Render("~/bundles/modernizr")
 </head>
 <body>
@@ -20,7 +21,6 @@
                     @if (Session["user_email"] != null)
                     {
                         <li class="nav-item">@Html.ActionLink("Izmeni Profil", "EditProfile", "Account", null, new { @class = "nav-link" })</li>
-                        <li class="nav-item"><a class="nav-link" href="#">Dobrodošli, @Session["user_email"]</a></li>
                         <li class="nav-item">@Html.ActionLink("Odjavi se", "Logout", "Account", null, new { @class = "nav-link" })</li>
                     }
                     else

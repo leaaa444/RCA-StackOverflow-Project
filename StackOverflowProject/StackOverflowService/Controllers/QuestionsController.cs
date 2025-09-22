@@ -16,7 +16,8 @@ namespace StackOverflowService.Controllers
     public class QuestionsController : Controller
     {
         private QuestionRepository questionRepo = new QuestionRepository();
-        private AnswerRepository answerRepo = new AnswerRepository(); // DODATO
+        private AnswerRepository answerRepo = new AnswerRepository();
+        private UserRepository userRepo = new UserRepository();
         private VoteRepository voteRepo = new VoteRepository();
 
         // GET: Questions
@@ -68,19 +69,27 @@ namespace StackOverflowService.Controllers
             }
 
             var answers = answerRepo.GetAnswersForQuestion(id);
+            answers = answers.OrderByDescending(a => a.JeNajboljiOdgovor)
+                 .ThenByDescending(a => a.BrojGlasova)
+                 .ToList();
+
+            var authorEmails = new List<string> { question.AutorEmail };
+            authorEmails.AddRange(answers.Select(a => a.AutorEmail));
+
+            var authors = userRepo.GetUsersByEmails(authorEmails.Distinct().ToList());
+            ViewBag.Authors = authors;
+
             ViewBag.Answers = answers;
 
-            var votedAnswerIds = new List<string>();
+            var votedAnswerIds = new HashSet<string>();
             if (Session["user_email"] != null)
             {
                 string userEmail = Session["user_email"].ToString();
-                var answerIds = answers.Select(a => a.RowKey).ToList();
 
-                if (answerIds.Any())
-                {
-                    var userVotes = voteRepo.GetVotesForQuestionByUser(answerIds, userEmail);
-                    votedAnswerIds = userVotes.Select(v => v.PartitionKey).ToList();
-                }
+                var allUserVotes = voteRepo.GetAllVotesByUser(userEmail);
+
+                votedAnswerIds = new HashSet<string>(allUserVotes.Select(v => v.PartitionKey));
+
             }
             ViewBag.VotedAnswerIds = votedAnswerIds;
 
@@ -98,6 +107,7 @@ namespace StackOverflowService.Controllers
         // Ova metoda prima podatke iz forme i kreira novo pitanje
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [ValidateInput(false)]
         public ActionResult Create(string naslov, string opisProblema, HttpPostedFileBase slikaGreske)
         {
             if (Session["user_email"] == null)
@@ -149,6 +159,7 @@ namespace StackOverflowService.Controllers
         // POST: Questions/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [ValidateInput(false)]
         public ActionResult Edit(QuestionEntity questionData, HttpPostedFileBase novaSlika)
         {
             var question = questionRepo.GetQuestion(questionData.RowKey);

@@ -11,87 +11,115 @@
     <div class="alert alert-success">@ViewBag.SuccessMessage</div>
 }
 
-@using (Html.BeginForm())
+@using (Html.BeginForm("EditProfile", "Account", FormMethod.Post, new { enctype = "multipart/form-data" }))
 {
     @Html.AntiForgeryToken()
 
-    <div class="form-horizontal">
-        <h4>Ažurirajte vaše podatke.</h4>
-        <hr />
-        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+<div class="form-horizontal">
+    <h4>Ažurirajte vaše podatke.</h4>
+    <hr />
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-        @* Skrivena polja koja moramo poslati nazad serveru *@
-        @Html.HiddenFor(model => model.PartitionKey)
-        @Html.HiddenFor(model => model.RowKey)
-        @Html.HiddenFor(model => model.Timestamp)
-        @Html.HiddenFor(model => model.ETag)
-        @Html.HiddenFor(model => model.Lozinka)
-        @Html.HiddenFor(model => model.SlikaUrl)
-        @Html.HiddenFor(model => model.Email)
+    @* Skrivena polja koja moramo poslati nazad serveru *@
+    @Html.HiddenFor(model => model.PartitionKey)
+    @Html.HiddenFor(model => model.RowKey)
+    @Html.HiddenFor(model => model.Timestamp)
+    @Html.HiddenFor(model => model.ETag)
+    @Html.HiddenFor(model => model.Lozinka)
+    @Html.HiddenFor(model => model.SlikaUrl)
+    @Html.HiddenFor(model => model.Email)
 
-        <div class="form-group">
-            <label class="control-label col-md-2">Email (nije moguće izmeniti)</label>
-            <div class="col-md-10">
-                <p class="form-control-static">@Model.Email</p>
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Ime, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Ime, new { htmlAttributes = new { @class = "form-control" } })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Prezime, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Prezime, new { htmlAttributes = new { @class = "form-control" } })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="control-label col-md-2">Pol</label>
-            <div class="col-md-10">
-                @foreach (var polValue in Enum.GetValues(typeof(StackOverflow.Data.Entities.Pol)))
-                {
-                    <div class="radio">
-                        <label>
-                            @Html.RadioButtonFor(model => model.Pol, polValue)
-                            @polValue.ToString()
-                        </label>
-                    </div>
-                }
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Drzava, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Drzava, new { htmlAttributes = new { @class = "form-control" } })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Grad, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Grad, new { htmlAttributes = new { @class = "form-control" } })
-            </div>
-        </div>
-
-        <div class="form-group">
-            @Html.LabelFor(model => model.Adresa, htmlAttributes: new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.EditorFor(model => model.Adresa, new { htmlAttributes = new { @class = "form-control" } })
-            </div>
-        </div>
-
-        <div class="form-group">
-            <div class="col-md-offset-2 col-md-10">
-                <input type="submit" value="Sačuvaj izmene" class="btn btn-default" />
-            </div>
+    <div class="form-group">
+        <label class="control-label col-md-2">Email</label>
+        <div class="col-md-10">
+            <p class="form-control-static">@Model.Email</p>
         </div>
     </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            @Html.ActionLink("Promeni lozinku", "ChangePassword")
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Ime, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Ime, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Prezime, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Prezime, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Pol</label>
+        <div class="col-md-10">
+            @foreach (var polValue in Enum.GetValues(typeof(StackOverflow.Data.Entities.Pol)))
+            {
+                <div class="radio">
+                    <label>
+                        @Html.RadioButtonFor(model => model.Pol, polValue)
+                        @polValue.ToString()
+                    </label>
+                </div>
+            }
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Drzava, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Drzava, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Grad, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Grad, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="form-group">
+        @Html.LabelFor(model => model.Adresa, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+            @Html.EditorFor(model => model.Adresa, new { htmlAttributes = new { @class = "form-control" } })
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Trenutna slika profila</label>
+        <div class="col-md-10">
+            @if (!string.IsNullOrEmpty(Model.SlikaUrl))
+            {
+                <img id="profileEditPreview" src="@(string.IsNullOrEmpty(Model.SlikaUrl) ? "" : Model.SlikaUrl)" class="profile-picture" />
+            }
+            else
+            {
+                <p>Nema priložene slike.</p>
+                <img id="profileEditPreview" src="#" class="profile-picture" />
+            }
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-md-2">Promeni sliku</label>
+        <div class="col-md-10">
+            <input type="file" name="novaSlika" class="image-upload-preview" data-preview-for="#profileEditPreview" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-10">
+            <input type="submit" value="Sačuvaj izmene" class="btn btn-default" />
+        </div>
+    </div>
+</div>
 }
 
 <div>

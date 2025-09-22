@@ -31,7 +31,9 @@
         <div class="form-group">
             <label class="control-label col-md-2" for="slikaGreske">Slika greške/problema</label>
             <div class="col-md-10">
-                <input type="file" name="slikaGreske" />
+                <input type="file" name="slikaGreske" class="image-upload-preview" data-preview-for="#questionPreview" />
+
+                <img id="questionPreview" src="#" alt="Pregled slike" style="max-width: 200px; margin-top: 10px; display: none;" />
             </div>
         </div>
 

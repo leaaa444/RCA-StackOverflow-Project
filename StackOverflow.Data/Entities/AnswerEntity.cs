@@ -26,5 +26,17 @@ namespace StackOverflow.Data.Entities
         }
 
         public AnswerEntity() { }
+
+        public async Task<string> DohvatiPodatkeAsync()
+        {
+            await Task.Delay(3000);
+            Console.WriteLine("Async metoda je završila!");
+            return "Podaci su stigli!";
+        }
+
+        public void PokreniProces()
+        {
+            Console.WriteLine("Proces je završen.");
+        }
     }
 }

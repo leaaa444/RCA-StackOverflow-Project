@@ -14,11 +14,8 @@ namespace StackOverflow.Data.Entities
 
         public HealthCheckLogEntity(string serviceName, string status)
         {
-            // PartitionKey grupiše logove po nazivu servisa
             this.PartitionKey = serviceName;
 
-            // RowKey mora biti jedinstven za svaki PartitionKey,
-            // koristimo obrnute otkucaje sata da bi najnoviji logovi bili na vrhu.
             this.RowKey = string.Format("{0:D19}-{1}", DateTime.MaxValue.Ticks - DateTime.UtcNow.Ticks, Guid.NewGuid());
 
             this.ServiceName = serviceName;

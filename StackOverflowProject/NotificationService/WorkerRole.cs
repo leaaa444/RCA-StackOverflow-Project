@@ -1,4 +1,4 @@
-using Contracts;
+﻿using Contracts;
 using Microsoft.WindowsAzure;
 using Microsoft.WindowsAzure.Diagnostics;
 using Microsoft.WindowsAzure.ServiceRuntime;
@@ -34,6 +34,7 @@ namespace NotificationService
         private AdminAlertRepository adminRepo = new AdminAlertRepository(); private AnswerRepository answerRepo = new AnswerRepository();
         private NotificationLogRepository logRepo = new NotificationLogRepository();
         private EmailSender emailSender = new EmailSender();
+        private QuestionRepository questionRepo = new QuestionRepository();
 
         public override void Run()
         {
@@ -125,15 +126,29 @@ namespace NotificationService
                         var answer = answerRepo.GetAnswerById(idOdgovora);
                         if (answer != null)
                         {
+                            var question = questionRepo.GetQuestion(answer.PartitionKey);
+                            if (question == null)
+                            {
+                                Trace.TraceError($"[Answers] Nije pronadjeno pitanje za odgovor ID: {idOdgovora}");
+                                acceptedAnswersQueue.DeleteMessage(answerMessage);
+                                continue;
+                            }
                             var allAnswersToQuestion = answerRepo.GetAnswersForQuestion(answer.PartitionKey);
                             var ucesnici = allAnswersToQuestion.Select(a => a.AutorEmail).Distinct().ToList();
 
                             foreach (var email in ucesnici)
                             {
-                                string subject = "Pitanje na koje ste odgovorili je zatvoreno";
-                                string body = $"<p>Pitanje je zatvoreno. Finalni odgovor je od autora {answer.AutorEmail} i glasi:</p><blockquote>{answer.TekstOdgovora}</blockquote>";
-                                await emailSender.SendEmailAsync(email, subject, body);
+                                string subject = $"Odgovoreno na pitanje: '{question.Naslov}'";
+                                string body = $@"
+                                    <h1>Tema je zatvorena</h1>
+                                    <p>Pitanje '{question.Naslov}' na koje ste odgovorili je zatvoreno.</p>
+                                    <p>Autor pitanja je označio sledeći odgovor kao najbolji:</p>
+                                    <hr>
+                                    <p><strong>Autor odgovora:</strong> {answer.AutorEmail}</p>
+                                    <blockquote>{answer.TekstOdgovora}</blockquote>
+                                    <hr>";
 
+                                await emailSender.SendEmailAsync(email, subject, body);
                             }
 
                             logRepo.LogNotification(new NotificationLogEntity(idOdgovora, ucesnici.Count));

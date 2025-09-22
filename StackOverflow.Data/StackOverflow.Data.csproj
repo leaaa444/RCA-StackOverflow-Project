@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DataSeeder.cs" />
     <Compile Include="Entities\AnswerEntity.cs" />
     <Compile Include="Entities\NotificationLogEntity.cs" />
     <Compile Include="Entities\Pol.cs" />

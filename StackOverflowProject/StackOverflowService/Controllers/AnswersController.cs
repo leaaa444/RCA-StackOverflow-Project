@@ -19,6 +19,7 @@ namespace StackOverflowService.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [ValidateInput(false)]
         public ActionResult Create(string idPitanja, string tekstOdgovora)
         {
             if (Session["user_email"] == null)

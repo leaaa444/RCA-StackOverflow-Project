@@ -28,42 +28,22 @@
 </div>
 
 
-<table class="table">
-    <tr>
-        <th>
-            Naslov
-        </th>
-        <th>
-            Autor
-        </th>
-        <th>
-            Datum
-        </th>
-        <th>
-            Odgovori
-        </th>
-        <th></th>
-    </tr>
-
+<div class="questions-list">
     @foreach (var item in Model)
     {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Question.Naslov)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Question.AutorEmail)
-            </td>
-            <td>
-                @item.Question.Timestamp.ToString("dd.MM.yyyy. HH:mm")
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.AnswerCount)
-            </td>
-            <td>
-                @Html.ActionLink("Detalji", "Details", new { id = item.Question.RowKey })
-            </td>
-        </tr>
+        <div class="question-card">
+            <div class="question-card-main">
+                <div class="question-card-title">
+                    @Html.ActionLink(item.Question.Naslov, "Details", new { id = item.Question.RowKey })
+                </div>
+                <div class="question-card-meta">
+                    @item.Question.AutorEmail | @item.Question.Timestamp.ToString("dd.MM.yyyy.")
+                </div>
+            </div>
+            <div class="question-card-stats">
+                <div class="stat-number">@item.AnswerCount</div>
+                <div class="stat-label">odgovora</div>
+            </div>
+        </div>
     }
-
-</table>
+</div>

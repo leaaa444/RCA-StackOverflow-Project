@@ -38,23 +38,26 @@
     </div>
 
     <div class="form-group">
-        <label class="control-label col-md-2">Trenutna slika</label>
-        <div class="col-md-10">
-            @if (!string.IsNullOrEmpty(Model.SlikaGreskeUrl))
-            {
-                <img src="@Model.SlikaGreskeUrl" style="max-width: 200px; max-height: 200px;" class="thumbnail" />
-            }
-            else
-            {
-                <p>Nema priložene slike.</p>
-            }
-        </div>
-    </div>
+        <label class="control-label col-md-2">
+            Trenutna slika
+        </label>
+            <div class="col-md-10">
+                @if (!string.IsNullOrEmpty(Model.SlikaGreskeUrl))
+                {
+                    <img id="questionEditPreview" src="@Model.SlikaGreskeUrl" style="max-width: 200px; max-height: 200px;" class="thumbnail" />
+                }
+                else
+                {
+                    <p>Nema priložene slike.</p>
+                    <img id="questionEditPreview" src="#" style="max-width: 200px; max-height: 200px; display: none;" class="thumbnail" />
+                }
+            </div>
+            </div>
 
     <div class="form-group">
         <label class="control-label col-md-2">Promeni sliku</label>
         <div class="col-md-10">
-            <input type="file" name="novaSlika" />
+            <input type="file" name="novaSlika" class="image-upload-preview" data-preview-for="#questionEditPreview" />
         </div>
     </div>
 
