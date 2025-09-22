@@ -13,12 +13,12 @@ namespace StackOverflow.Data.Entities
         public string Naslov { get; set; }
         public string OpisProblema { get; set; }
         public string SlikaGreskeUrl { get; set; }
-        public string AutorEmail { get; set; } // Da znamo ko je postavio pitanje
+        public string AutorEmail { get; set; } 
 
         public QuestionEntity(string autorEmail)
         {
-            PartitionKey = "Question"; // Sva pitanja su u istoj particiji
-            RowKey = Guid.NewGuid().ToString(); // Jedinstveni ID za svako pitanje
+            PartitionKey = "Question"; 
+            RowKey = Guid.NewGuid().ToString(); 
             AutorEmail = autorEmail;
             Timestamp = DateTime.UtcNow;
         }

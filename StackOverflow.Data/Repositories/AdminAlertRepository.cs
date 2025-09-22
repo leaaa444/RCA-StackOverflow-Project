@@ -18,7 +18,7 @@ namespace StackOverflow.Data.Repositories
         {
             CloudStorageAccount storageAccount = CloudStorageAccount.Parse(CloudConfigurationManager.GetSetting("DataConnectionString"));
             CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-            table = tableClient.GetTableReference("AlertEmails"); // Naziv tabele kao u projektnom zadatku
+            table = tableClient.GetTableReference("AlertEmails");
             table.CreateIfNotExists();
         }
 
